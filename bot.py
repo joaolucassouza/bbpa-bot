@@ -38,9 +38,9 @@ def get_saldos_iniciais():
     return load_json("saldos_iniciais.json", {})
 
 
-def get_safewords():
-    return load_json("safewords.json", {})
-
+def debug_log_safewords():
+    data = get_safewords()
+    print("DEBUG_SAFEWORDS:", data)
 
 def get_usuarios():
     return load_json("usuarios.json", {})
