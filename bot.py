@@ -36,6 +36,12 @@ def save_json(path, data):
 
 def get_saldos_iniciais():
     return load_json("saldos_iniciais.json", {})
+    
+def get_saldos_iniciais():
+    return load_json("saldos_iniciais.json", {})
+
+def get_safewords():
+    return load_json("safewords.json", {})
 
 
 def debug_log_safewords():
@@ -188,6 +194,7 @@ def main():
         raise RuntimeError("BOT_TOKEN não foi definido nas variáveis de ambiente.")
 
     app = ApplicationBuilder().token(TOKEN).build()
+    debug_log_safewords()
 
     # ConversationHandler para o fluxo de registro com /start
     conv_handler = ConversationHandler(
