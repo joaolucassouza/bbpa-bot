@@ -701,7 +701,6 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     return ConversationHandler.END
 
 # --------- FUNÇÃO PRINCIPAL ---------
-
 def main():
     if not TOKEN:
         raise RuntimeError("BOT_TOKEN não foi definido nas variáveis de ambiente.")
@@ -722,8 +721,6 @@ def main():
     # ConversationHandler para o fluxo de depósito com /deposito
     deposito_handler = ConversationHandler(
         entry_points=[CommandHandler("deposito", deposito_inicio)],
-            deposito_handler = ConversationHandler(
-        entry_points=[CommandHandler("deposito", deposito_inicio)],
         states={
             ESCOLHER_CATEGORIA: [
                 CallbackQueryHandler(deposito_escolher_categoria, pattern="^cat_")
@@ -738,14 +735,12 @@ def main():
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
-        fallbacks=[CommandHandler("cancelar", cancelar)],
-    )
-
     app.add_handler(conv_handler)
     app.add_handler(deposito_handler)
     app.add_handler(CommandHandler("saldo", saldo))
 
     app.run_polling()
+
 
 if __name__ == "__main__":
     main()
