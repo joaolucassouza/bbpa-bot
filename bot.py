@@ -664,17 +664,18 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
 
     reply_markup = InlineKeyboardMarkup(botoes)
 
+    # >>> descrição da categoria antes dos botões <<<
     desc = DESCRICOES_CATEGORIAS.get(categoria)
 
-texto = [f"Categoria escolhida: {categoria}"]
-if desc:
-    texto.append(desc)
-texto.append("Agora escolha o indicado que vai receber moedas:")
+    texto = [f"Categoria escolhida: {categoria}"]
+    if desc:
+        texto.append(desc)
+    texto.append("Agora escolha o indicado que vai receber moedas:")
 
-await query.edit_message_text(
-    "\n".join(texto),
-    reply_markup=reply_markup,
-)
+    await query.edit_message_text(
+        "\n".join(texto),
+        reply_markup=reply_markup,
+    )
 
     return ESCOLHER_INDICADO
 
