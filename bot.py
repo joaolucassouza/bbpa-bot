@@ -44,7 +44,7 @@ CATEGORIAS = {
         "Coisas Naturais, Marina Sena",
         "DON'T TAP THE GLASS, Tyler, the Creator",
         "eternal sunshine deluxe: brighter days ahead, Ariana Grande",
-        "Mans Best Friend, Sabrina Carpenter",
+        "Man's Best Friend, Sabrina Carpenter",
         "MAYHEM, Lady Gaga",
         "The Life Of a Showgirl, Taylor Swift",
         "Virgin, Lorde",
@@ -252,7 +252,7 @@ CATEGORIAS = {
     ],
     "Bangermaker do Ano": [
         "Ariana Grande",
-        "Bad Benny",
+        "Bad Bunny",
         "Lady Gaga",
         "Marina Sena",
         "ROSALÍA",
@@ -330,6 +330,58 @@ CATEGORIAS = {
         "The Marías",
         "Wet Leg",
     ],
+}
+# --------- DESCRIÇÕES DAS CATEGORIAS ---------
+DESCRICOES_CATEGORIAS = {
+    "Single do Ano": (
+        "Categoria que considera apenas singles de trabalho, lançados isoladamente "
+        "para divulgar o artista, um álbum ou engajar o fandom."
+    ),
+    "Hitmaker do Ano": (
+        "Categoria que premia o artista que mais teve músicas consideradas grandes "
+        "composições durante o ano."
+    ),
+    "Bangermaker do Ano": (
+        "Categoria que premia o artista que mais teve músicas ouvidas principalmente "
+        "pela produção e batida, aquelas faixas que viram banger pelo som em si."
+    ),
+    "Sample do Ano": (
+        "Melhor uso criativo de sample ou interpolação: não é só copiar, é transformar "
+        "a referência em algo novo e marcante."
+    ),
+    "Feat do Ano": (
+        "Colaboração mais impactante: química entre artistas, destaque de todos os "
+        "envolvidos e efeito da parceria nos charts."
+    ),
+    "Chart Breaker": (
+        "Faixa que mais quebrou as paradas: grandes subidas, picos inesperados ou "
+        "saltos absurdos em relação ao debut."
+    ),
+    "Smash Viral": (
+        "Música que inesperadamente hitou dentro do grupo sem ter fandom estabelecido: "
+        "geralmente começa com uma pessoa colocando nos charts e, a partir daí, alcança mais gente "
+        "ou vira um hit de um só."
+    ),
+    "Crossover do Ano": (
+        "Música que atravessou fronteiras: juntou gêneros ou públicos diferentes e "
+        "conseguiu se tornar grande em mais de uma bolha."
+    ),
+    "Comeback do Ano": (
+        "Retorno mais relevante às paradas: artista que voltou de hiato, flop, sumiço "
+        "ou mudança de fase e reassumiu seu espaço."
+    ),
+    "Fan Favourite": (
+        "Artista ou ato que o grupo mais abraçou emocionalmente: xodó coletivo, "
+        "presença constante em comentários e playlists, mesmo sem ser necessariamente o maior em números."
+    ),
+    "Fandom do Ano": (
+        "Fandom mais ativo e barulhento: quem mais mobiliza o grupo, força streams, "
+        "defende artista em discussão e pesa nos charts."
+    ),
+    "Track Twist": (
+        "Faixa que mistura mundos diferentes: gêneros improváveis, referências estranhas "
+        "ou viradas inesperadas que ainda assim funcionam muito bem."
+    ),
 }
 
 # --------- FUNÇÕES AUXILIARES PARA JSON ---------
