@@ -694,12 +694,16 @@ async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAU
 
     context.user_data["deposito"]["indicado"] = indicado
 
-    await query.edit_message_text(
-        f"Categoria: {categoria}\n"
-        f"Indicado: {indicado}\n\n"
-        "Quantas moedas você quer depositar aqui?\n"
-        "(Lembre-se: máximo 50 moedas por indicado.)"
-    )
+        desc = DESCRICOES_CATEGORIAS.get(categoria)
+
+    texto = [f"Categoria: {categoria}"]
+    if desc:
+        texto.append(desc)
+    texto.append(f"\nIndicado: {indicado}\n")
+    texto.append("Quantas moedas você quer depositar aqui?")
+    texto.append("(Lembre-se: máximo 50 moedas por indicado.)")
+
+    await query.edit_message_text("\n".join(texto))
 
     return INSERIR_VALOR
 
