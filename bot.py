@@ -707,7 +707,7 @@ def main():
 
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # ConversationHandler para o fluxo de registro com /start
+        # ConversationHandler para o fluxo de registro com /start
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -716,6 +716,7 @@ def main():
             PEDIR_SAFEWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, receber_safeword)],
         },
         fallbacks=[CommandHandler("cancelar", cancelar)],
+        per_message=True,
     )
 
     # ConversationHandler para o fluxo de depósito com /deposito
@@ -733,6 +734,7 @@ def main():
             ],
         },
         fallbacks=[CommandHandler("cancelar", cancelar)],
+        per_message=True,
     )
 
     app.add_handler(conv_handler)
