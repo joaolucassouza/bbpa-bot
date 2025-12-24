@@ -339,6 +339,9 @@ CATEGORIAS = {
         "Wet Leg",
     ],
 }
+
+CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
+ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
 # --------- DESCRIÇÕES DAS CATEGORIAS ---------
 DESCRICOES_CATEGORIAS = {
     "Single do Ano": (
@@ -391,8 +394,6 @@ DESCRICOES_CATEGORIAS = {
         "ou viradas inesperadas que ainda assim funcionam muito bem."
     ),
 }
-CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
-ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
 
 # --------- FUNÇÕES AUXILIARES PARA JSON ---------
 def load_json(path, default):
