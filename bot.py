@@ -1,7 +1,7 @@
 import os
 import json
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -17,6 +17,14 @@ PEDIR_NOME, PERGUNTAR_SE_TEM_ALGO, PEDIR_SAFEWORD, ESCOLHER_CATEGORIA, ESCOLHER_
 
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_IDS = {6098995197}
+BOT_COMMANDS = [
+    BotCommand("start", "Registrar e pegar saldo inicial"),
+    BotCommand("saldo", "Ver seu saldo atual"),
+    BotCommand("deposito", "Depositar moedas em um indicado"),
+    BotCommand("status", "Ver em quais categorias você já votou"),
+    BotCommand("meus_depositos", "Ver onde você já depositou"),
+]
+
 # --------- CATEGORIAS E INDICADOS ---------
 CATEGORIAS = {
     # POP
@@ -997,6 +1005,16 @@ def main():
 
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # ---------- MENU DE COMANDOS DO BOT ----------
+    bot_commands = [
+        BotCommand("start", "Registrar e pegar saldo inicial"),
+        BotCommand("saldo", "Ver seu saldo atual"),
+        BotCommand("deposito", "Depositar moedas em um indicado"),
+        BotCommand("status", "Ver em quais categorias você já votou"),
+        BotCommand("meus_depositos", "Ver onde você já depositou"),
+    ]
+    app.bot.set_my_commands(bot_commands)
+
     # ConversationHandler para o fluxo de registro com /start
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -1008,7 +1026,7 @@ def main():
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
-       # ConversationHandler para o fluxo de depósito com /deposito
+    # ConversationHandler para o fluxo de depósito com /deposito
     deposito_handler = ConversationHandler(
         entry_points=[CommandHandler("deposito", deposito_inicio)],
         states={
@@ -1027,7 +1045,6 @@ def main():
                 CallbackQueryHandler(deposito_cancelar, pattern="^dep_cancelar$"),
             ],
         },
-        # você pode manter o /cancelar geral também, se quiser
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
@@ -1038,7 +1055,7 @@ def main():
     app.add_handler(CommandHandler("meu_id", meu_id))
     app.add_handler(CommandHandler("meus_depositos", meus_depositos))
     app.add_handler(CommandHandler("relatorio_depositos", relatorio_depositos))
-    
+
     app.run_polling()
 
 
