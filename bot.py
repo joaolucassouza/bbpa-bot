@@ -662,9 +662,15 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     if linha:
         botoes.append(linha)
 
+    # linha extra com Voltar + Cancelar
+    botoes.append([
+        InlineKeyboardButton("⬅️ Trocar categoria", callback_data="dep_voltar_cat"),
+        InlineKeyboardButton("❌ Cancelar depósito", callback_data="dep_cancelar"),
+    ])
+
     reply_markup = InlineKeyboardMarkup(botoes)
 
-    # >>> descrição da categoria antes dos botões <<<
+    # descrição da categoria antes dos botões
     desc = DESCRICOES_CATEGORIAS.get(categoria)
 
     texto = [f"Categoria escolhida: {categoria}"]
@@ -757,6 +763,83 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     usuario = usuarios[chat_id]
     saldo_atual = usuario.get("saldo", 0)
 
+    async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+    context.user_data.pop("deposito", None)
+    await query.edit_message_text("Depósito cancelado.")
+    return ConversationHandler.END
+
+
+async def deposito_voltar_categoria(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+
+    context.user_data.pop("deposito", None)
+
+    botoes = []
+    linha = []
+    for categoria in CATEGORIAS.keys():
+        linha.append(InlineKeyboardButton(categoria, callback_data=f"cat_{categoria}"))
+        if len(linha) == 1:
+            botoes.append(linha)
+            linha = []
+    if linha:
+        botoes.append(linha)
+
+    reply_markup = InlineKeyboardMarkup(botoes)
+
+    await query.edit_message_text(
+        "Escolha a categoria em que você quer depositar moedas:",
+        reply_markup=reply_markup,
+    )
+
+    return ESCOLHER_CATEGORIA
+
+
+async def deposito_voltar_indicado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    await query.answer()
+
+    deposito = context.user_data.get("deposito", {})
+    categoria = deposito.get("categoria")
+
+    if not categoria or categoria not in CATEGORIAS:
+        await query.edit_message_text("Não consegui recuperar a categoria. Use /deposito de novo.")
+        return ConversationHandler.END
+
+    indicados = CATEGORIAS[categoria]
+
+    botoes = []
+    linha = []
+    for nome_ind in indicados:
+        linha.append(InlineKeyboardButton(nome_ind, callback_data=f"ind_{nome_ind}"))
+        if len(linha) == 1:
+            botoes.append(linha)
+            linha = []
+    if linha:
+        botoes.append(linha)
+
+    botoes.append([
+        InlineKeyboardButton("⬅️ Trocar categoria", callback_data="dep_voltar_cat"),
+        InlineKeyboardButton("❌ Cancelar depósito", callback_data="dep_cancelar"),
+    ])
+
+    reply_markup = InlineKeyboardMarkup(botoes)
+
+    desc = DESCRICOES_CATEGORIAS.get(categoria)
+    texto = [f"Categoria escolhida: {categoria}"]
+    if desc:
+        texto.append(desc)
+    texto.append("Agora escolha o indicado que vai receber moedas:")
+
+    await query.edit_message_text(
+        "\n".join(texto),
+        reply_markup=reply_markup,
+    )
+
+    return ESCOLHER_INDICADO
+
     # ---- Regra 1: limite de 50 moedas por indicado ----
     depositos_user = usuario.setdefault("depositos", {})
     depositos_cat = depositos_user.setdefault(categoria, {})
@@ -822,20 +905,26 @@ def main():
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
-    # ConversationHandler para o fluxo de depósito com /deposito
+       # ConversationHandler para o fluxo de depósito com /deposito
     deposito_handler = ConversationHandler(
         entry_points=[CommandHandler("deposito", deposito_inicio)],
         states={
             ESCOLHER_CATEGORIA: [
-                CallbackQueryHandler(deposito_escolher_categoria, pattern="^cat_")
+                CallbackQueryHandler(deposito_escolher_categoria, pattern="^cat_"),
+                CallbackQueryHandler(deposito_cancelar, pattern="^dep_cancelar$"),
             ],
             ESCOLHER_INDICADO: [
-                CallbackQueryHandler(deposito_escolher_indicado, pattern="^ind_")
+                CallbackQueryHandler(deposito_escolher_indicado, pattern="^ind_"),
+                CallbackQueryHandler(deposito_voltar_categoria, pattern="^dep_voltar_cat$"),
+                CallbackQueryHandler(deposito_cancelar, pattern="^dep_cancelar$"),
             ],
             INSERIR_VALOR: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, deposito_inserir_valor)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, deposito_inserir_valor),
+                CallbackQueryHandler(deposito_voltar_indicado, pattern="^dep_voltar_ind$"),
+                CallbackQueryHandler(deposito_cancelar, pattern="^dep_cancelar$"),
             ],
         },
+        # você pode manter o /cancelar geral também, se quiser
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
