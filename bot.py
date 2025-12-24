@@ -521,6 +521,10 @@ async def receber_safeword(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
+async def meu_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    await update.message.reply_text(f"Seu ID é: {chat_id}")
+
 
 async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Permite cancelar a conversa a qualquer momento."""
@@ -965,6 +969,7 @@ def main():
     app.add_handler(deposito_handler)
     app.add_handler(CommandHandler("saldo", saldo))
     app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("meu_id", meu_id))
 
     app.run_polling()
 
