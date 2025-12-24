@@ -143,7 +143,7 @@ CATEGORIAS = {
         "La Yugular, ROSALÍA",
         "JUMP, BLACKPINK",
         "Marolento, Puterrier",
-        "Relíquia, ROSALÍA",
+        "Reliquia, ROSALÍA",
         "VOY A LLeVARTE PA PR, Bad Bunny",
     ],
 
