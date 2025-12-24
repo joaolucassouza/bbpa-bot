@@ -495,6 +495,46 @@ async def saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"{nome_exibicao}, seu saldo atual é de {saldo_atual} moedas de Payola de Ouro."
     )
+    
+# --------- COMANDO /status ---------
+
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Mostra saldo e situação de votos por categoria."""
+    chat_id = str(update.effective_chat.id)
+    usuarios = get_usuarios()
+
+    if chat_id not in usuarios:
+        await update.message.reply_text(
+            "Ainda não te reconheço.\n"
+            "Use /start para se registrar com sua safeword."
+        )
+        return
+
+    usuario = usuarios[chat_id]
+    saldo_atual = usuario.get("saldo", 0)
+    categorias_votadas = set(usuario.get("categorias_votadas", []))
+
+    todas_categorias = set(CATEGORIAS.keys())
+    categorias_faltantes = sorted(todas_categorias - categorias_votadas)
+    categorias_feitas = sorted(categorias_votadas & todas_categorias)
+
+    texto = [f"Seu saldo atual: {saldo_atual} moedas de Payola de Ouro.\n"]
+
+    if categorias_feitas:
+        texto.append("Categorias em que você já votou:")
+        for cat in categorias_feitas:
+            texto.append(f"• {cat}")
+    else:
+        texto.append("Você ainda não votou em nenhuma categoria.")
+
+    if categorias_faltantes:
+        texto.append("\nCategorias que ainda faltam:")
+        for cat in categorias_faltantes:
+            texto.append(f"• {cat}")
+    else:
+        texto.append("\nVocê já votou em todas as categorias disponíveis!")
+
+    await update.message.reply_text("\n".join(texto))
 
 # --------- FLUXO DE DEPÓSITO COM /deposito ---------
 
@@ -738,6 +778,7 @@ def main():
     app.add_handler(conv_handler)
     app.add_handler(deposito_handler)
     app.add_handler(CommandHandler("saldo", saldo))
+    app.add_handler(CommandHandler("status", status))
 
     app.run_polling()
 
