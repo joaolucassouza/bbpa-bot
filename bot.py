@@ -1003,17 +1003,23 @@ def main():
     if not TOKEN:
         raise RuntimeError("BOT_TOKEN não foi definido nas variáveis de ambiente.")
 
-    app = ApplicationBuilder().token(TOKEN).build()
+    async def post_init(application):
+        # define o menu de comandos do bot
+        bot_commands = [
+            BotCommand("start", "Registrar e pegar saldo inicial"),
+            BotCommand("saldo", "Ver seu saldo atual"),
+            BotCommand("deposito", "Depositar moedas em um indicado"),
+            BotCommand("status", "Ver em quais categorias você já votou"),
+            BotCommand("meus_depositos", "Ver onde você já depositou"),
+        ]
+        await application.bot.set_my_commands(bot_commands)
 
-    # ---------- MENU DE COMANDOS DO BOT ----------
-    bot_commands = [
-        BotCommand("start", "Registrar e pegar saldo inicial"),
-        BotCommand("saldo", "Ver seu saldo atual"),
-        BotCommand("deposito", "Depositar moedas em um indicado"),
-        BotCommand("status", "Ver em quais categorias você já votou"),
-        BotCommand("meus_depositos", "Ver onde você já depositou"),
-    ]
-    app.bot.set_my_commands(bot_commands)
+    app = (
+        ApplicationBuilder()
+        .token(TOKEN)
+        .post_init(post_init)
+        .build()
+    )
 
     # ConversationHandler para o fluxo de registro com /start
     conv_handler = ConversationHandler(
