@@ -391,6 +391,8 @@ DESCRICOES_CATEGORIAS = {
         "ou viradas inesperadas que ainda assim funcionam muito bem."
     ),
 }
+CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
+ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
 
 # --------- FUNÇÕES AUXILIARES PARA JSON ---------
 def load_json(path, default):
@@ -729,8 +731,14 @@ async def deposito_inicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botoes = []
     linha = []
     for nome_cat in CATEGORIAS.keys():
-        # callback_data com prefixo 'cat_' para diferenciar
-        linha.append(InlineKeyboardButton(nome_cat, callback_data=f"cat_{nome_cat}"))
+        # usa ID curto para não estourar limite de callback_data
+        cat_id = CAT_IDS[nome_cat]
+        linha.append(
+            InlineKeyboardButton(
+                nome_cat,
+                callback_data=f"cat_{cat_id}",
+            )
+        )
         if len(linha) == 2:
             botoes.append(linha)
             linha = []
@@ -750,13 +758,14 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     query = update.callback_query
     await query.answer()
 
-    data = query.data  # ex.: 'cat_Álbum do Ano'
+    data = query.data  # ex.: 'cat_c12'
     if not data.startswith("cat_"):
         await query.edit_message_text("Categoria inválida. Use /deposito de novo.")
         return ConversationHandler.END
 
-    categoria = data[4:]  # remove 'cat_'
-    if categoria not in CATEGORIAS:
+    cat_id = data[4:]  # remove 'cat_'
+    categoria = ID_TO_CAT.get(cat_id)
+    if not categoria:
         await query.edit_message_text("Categoria não encontrada. Use /deposito de novo.")
         return ConversationHandler.END
 
