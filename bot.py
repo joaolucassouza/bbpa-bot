@@ -799,11 +799,11 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     botoes = []
     linha = []
     for nome_ind in indicados:
-    ind_id = IND_IDS[categoria][nome_ind]
-    linha.append(
-        InlineKeyboardButton(
-            nome_ind,
-            callback_data=f"ind_{categoria}|{ind_id}",
+        ind_id = IND_IDS[categoria][nome_ind]
+        linha.append(
+            InlineKeyboardButton(
+                nome_ind,
+                callback_data=f"ind_{categoria}|{ind_id}",
         )
     )
         if len(linha) == 1:  # 1 por linha pra não ficar muito apertado
