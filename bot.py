@@ -763,6 +763,34 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     usuario = usuarios[chat_id]
     saldo_atual = usuario.get("saldo", 0)
 
+    # valida saldo
+    if valor > saldo_atual:
+        await update.message.reply_text(
+            f"Você não tem saldo suficiente. Seu saldo atual é de {saldo_atual} moedas."
+        )
+        return INSERIR_VALOR
+
+    # registra depósito (ajusta conforme seu formato antigo)
+    usuario.setdefault("depositos", []).append(
+        {"categoria": categoria, "indicado": indicado, "valor": valor}
+    )
+    usuario["saldo"] = saldo_atual - valor
+    usuarios[chat_id] = usuario
+    salvar_usuarios(usuarios)  # mesma função que você já usava para gravar o JSON
+
+    await update.message.reply_text(
+        f"Depósito registrado!\n"
+        f"Categoria: {categoria}\n"
+        f"Indicado: {indicado}\n"
+        f"Valor: {valor} moedas\n"
+        f"Novo saldo: {usuario['saldo']} moedas."
+    )
+
+    # limpa contexto do depósito
+    context.user_data.pop("deposito", None)
+
+    return ConversationHandler.END
+
 async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
