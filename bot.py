@@ -671,30 +671,30 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     )
     return ESCOLHER_INDICADO
 
-async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Recebe o indicado escolhido e pergunta quantas moedas deseja depositar."""
+async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Recebe o indicado escolhido e pergunta quantas moedas depositar."""
     query = update.callback_query
     await query.answer()
 
-    data = query.data  # ex.: 'ind_Abracadabra – Lady Gaga'
+    data = query.data  # ex.: "ind_Abracadabra"
     if not data.startswith("ind_"):
-        await query.edit_message_text("Indicado inválido. Use /deposito de novo.")
+        await query.edit_message_text("Indicado inválido.")
         return ConversationHandler.END
 
-    indicado = data[4:]  # remove 'ind_'
+    indicado = data[4:]  # remove "ind_"
 
     deposito = context.user_data.get("deposito", {})
     categoria = deposito.get("categoria")
 
-    if not categoria or categoria not in CATEGORIAS or indicado not in CATEGORIAS[categoria]:
+    if not categoria or categoria not in CATEGORIAS:
         await query.edit_message_text(
-            "Não consegui associar esse indicado à categoria. Use /deposito de novo."
+            "Não consegui associar esse indicado a uma categoria válida."
         )
         return ConversationHandler.END
 
     context.user_data["deposito"]["indicado"] = indicado
 
-        desc = DESCRICOES_CATEGORIAS.get(categoria)
+    desc = DESCRICOES_CATEGORIAS.get(categoria)
 
     texto = [f"Categoria: {categoria}"]
     if desc:
@@ -704,7 +704,7 @@ async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAU
     texto.append("(Lembre-se: máximo 50 moedas por indicado.)")
 
     await query.edit_message_text("\n".join(texto))
-
+    
     return INSERIR_VALOR
 
 async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_TYPE):
