@@ -16,7 +16,7 @@ from telegram.ext import (
 PEDIR_NOME, PERGUNTAR_SE_TEM_ALGO, PEDIR_SAFEWORD, ESCOLHER_CATEGORIA, ESCOLHER_INDICADO, INSERIR_VALOR = range(6)
 
 TOKEN = os.getenv("BOT_TOKEN")
-
+ADMIN_IDS = {6098995197}
 # --------- CATEGORIAS E INDICADOS ---------
 CATEGORIAS = {
     # POP
@@ -525,6 +525,69 @@ async def meu_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     await update.message.reply_text(f"Seu ID é: {chat_id}")
 
+async def relatorio_depositos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    if chat_id not in ADMIN_IDS:
+        await update.message.reply_text("Comando disponível só para admin.")
+        return
+
+    usuarios = get_usuarios()
+    totais = {}  # (categoria, indicado) -> soma
+
+    for dados in usuarios.values():
+        for dep in dados.get("depositos", []):
+            chave = (dep["categoria"], dep["indicado"])
+            totais[chave] = totais.get(chave, 0) + dep["valor"]
+
+    if not totais:
+        await update.message.reply_text("Ainda não há depósitos registrados.")
+        return
+
+    linhas = []
+    categorias = sorted({c for (c, _) in totais.keys()})
+    for categoria in categorias:
+        linhas.append(f"\n📂 {categoria}:")
+        pares = [(ind, v) for (c, ind), v in totais.items() if c == categoria]
+        pares.sort(key=lambda x: -x[1])
+        for indicado, valor in pares:
+            linhas.append(f"  • {indicado}: {valor} moedas")
+
+    await update.message.reply_text("\n".join(linhas[:4000]))
+
+async def meus_depositos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = str(update.effective_chat.id)
+    usuarios = get_usuarios()
+
+    if chat_id not in usuarios:
+        await update.message.reply_text(
+            "Ainda não te reconheço.\n"
+            "Use /start para se registrar com sua safeword."
+        )
+        return
+
+    usuario = usuarios[chat_id]
+    lista = usuario.get("depositos", [])
+
+    if not lista:
+        await update.message.reply_text("Você ainda não fez nenhum depósito.")
+        return
+
+    # agrupa por categoria/indicado
+    totais = {}
+    for dep in lista:
+        chave = (dep["categoria"], dep["indicado"])
+        totais[chave] = totais.get(chave, 0) + dep["valor"]
+
+    linhas = ["Seus depósitos:"]
+    categorias = sorted({c for (c, _) in totais.keys()})
+    for categoria in categorias:
+        linhas.append(f"\n📂 {categoria}:")
+        pares = [(ind, v) for (c, ind), v in totais.items() if c == categoria]
+        pares.sort(key=lambda x: -x[1])
+        for indicado, valor in pares:
+            linhas.append(f"  • {indicado}: {valor} moedas")
+
+    await update.message.reply_text("\n".join(linhas[:4000]))
 
 async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Permite cancelar a conversa a qualquer momento."""
@@ -970,7 +1033,9 @@ def main():
     app.add_handler(CommandHandler("saldo", saldo))
     app.add_handler(CommandHandler("status", status))
     app.add_handler(CommandHandler("meu_id", meu_id))
-
+    app.add_handler(CommandHandler("meus_depositos", meus_depositos))
+    app.add_handler(CommandHandler("relatorio_depositos", relatorio_depositos))
+    
     app.run_polling()
 
 
