@@ -540,25 +540,67 @@ async def relatorio_depositos(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     usuarios = get_usuarios()
-    totais = {}  # (categoria, indicado) -> soma
 
-    for dados in usuarios.values():
-        for dep in dados.get("depositos", []):
-            chave = (dep["categoria"], dep["indicado"])
-            totais[chave] = totais.get(chave, 0) + dep["valor"]
+    # --- totais por categoria/indicado ---
+    totais = {}  # (categoria, indicado) -> soma
+    categorias_por_usuario = {}  # chat_id -> set(categorias com depósito)
+
+    for uid, dados in usuarios.items():
+        depositos = dados.get("depositos", [])
+        cats_user = set()
+        for dep in depositos:
+            categoria = dep["categoria"]
+            indicado = dep["indicado"]
+            valor = dep["valor"]
+
+            chave = (categoria, indicado)
+            totais[chave] = totais.get(chave, 0) + valor
+
+            cats_user.add(categoria)
+
+        categorias_por_usuario[uid] = cats_user
+
+    if not usuarios:
+        await update.message.reply_text("Ainda não há usuários registrados.")
+        return
 
     if not totais:
         await update.message.reply_text("Ainda não há depósitos registrados.")
         return
 
     linhas = []
-    categorias = sorted({c for (c, _) in totais.keys()})
-    for categoria in categorias:
+
+    # --- parte 1: totais por indicado ---
+    categorias_ordenadas = sorted({c for (c, _) in totais.keys()})
+    for categoria in categorias_ordenadas:
         linhas.append(f"\n📂 {categoria}:")
         pares = [(ind, v) for (c, ind), v in totais.items() if c == categoria]
         pares.sort(key=lambda x: -x[1])
         for indicado, valor in pares:
             linhas.append(f"  • {indicado}: {valor} moedas")
+
+    # --- parte 2: quem ainda não depositou em cada categoria ---
+    todas_categorias = set(CATEGORIAS.keys())
+    linhas.append("\n\n👥 Usuários que ainda não depositaram por categoria:")
+
+    # mapeia id -> nome para ficar legível
+    nomes_usuarios = {
+        uid: dados.get("nome", uid)
+        for uid, dados in usuarios.items()
+    }
+
+    for categoria in sorted(todas_categorias):
+        faltam = [
+            nomes_usuarios[uid]
+            for uid, cats in categorias_por_usuario.items()
+            if categoria not in cats
+        ]
+        if not faltam:
+            continue
+
+        linhas.append(f"\n• {categoria}:")
+        for nome in sorted(faltam):
+            linhas.append(f"  - {nome}")
 
     await update.message.reply_text("\n".join(linhas[:4000]))
 
