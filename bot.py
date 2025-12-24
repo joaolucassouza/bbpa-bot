@@ -496,6 +496,88 @@ async def saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{nome_exibicao}, seu saldo atual é de {saldo_atual} moedas de Payola de Ouro."
     )
 
+# --------- FLUXO DE DEPÓSITO COM /deposito ---------
+
+async def deposito_inicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Inicia o fluxo de depósito: escolhe categoria."""
+    chat_id = str(update.effective_chat.id)
+    usuarios = get_usuarios()
+
+    if chat_id not in usuarios:
+        await update.message.reply_text(
+            "Ainda não te reconheço.\n"
+            "Use /start para se registrar com sua safeword antes de depositar moedas."
+        )
+        return ConversationHandler.END
+
+    # Zera dados temporários de depósito
+    context.user_data["deposito"] = {}
+
+    # Monta teclado com todas as categorias
+    botoes = []
+    linha = []
+    for nome_cat in CATEGORIAS.keys():
+        # callback_data com prefixo 'cat_' para diferenciar
+        linha.append(InlineKeyboardButton(nome_cat, callback_data=f"cat_{nome_cat}"))
+        if len(linha) == 2:
+            botoes.append(linha)
+            linha = []
+    if linha:
+        botoes.append(linha)
+
+    reply_markup = InlineKeyboardMarkup(botoes)
+
+    await update.message.reply_text(
+        "Escolha a categoria em que você quer depositar moedas:",
+        reply_markup=reply_markup,
+    )
+    return ESCOLHER_CATEGORIA
+
+async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Recebe a categoria escolhida e mostra os indicados daquela categoria."""
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data  # ex.: 'cat_Álbum do Ano'
+    if not data.startswith("cat_"):
+        await query.edit_message_text("Categoria inválida. Use /deposito de novo.")
+        return ConversationHandler.END
+
+    categoria = data[4:]  # remove 'cat_'
+    if categoria not in CATEGORIAS:
+        await query.edit_message_text("Categoria não encontrada. Use /deposito de novo.")
+        return ConversationHandler.END
+
+    context.user_data.setdefault("deposito", {})
+    context.user_data["deposito"]["categoria"] = categoria
+
+    indicados = CATEGORIAS[categoria]
+
+    if not indicados:
+        await query.edit_message_text(
+            f"A categoria {categoria} ainda não tem indicados cadastrados."
+        )
+        return ConversationHandler.END
+
+    # Monta teclado com indicados (prefixo 'ind_')
+    botoes = []
+    linha = []
+    for nome_ind in indicados:
+        linha.append(InlineKeyboardButton(nome_ind, callback_data=f"ind_{nome_ind}"))
+        if len(linha) == 1:  # 1 por linha pra não ficar muito apertado
+            botoes.append(linha)
+            linha = []
+    if linha:
+        botoes.append(linha)
+
+    reply_markup = InlineKeyboardMarkup(botoes)
+
+    await query.edit_message_text(
+        f"Categoria escolhida: {categoria}.\n"
+        "Agora escolha o indicado que vai receber moedas:",
+        reply_markup=reply_markup,
+    )
+    return ESCOLHER_INDICADO
 
 # --------- FUNÇÃO PRINCIPAL ---------
 
@@ -504,7 +586,6 @@ def main():
         raise RuntimeError("BOT_TOKEN não foi definido nas variáveis de ambiente.")
 
     app = ApplicationBuilder().token(TOKEN).build()
-    debug_log_safewords()
 
     # ConversationHandler para o fluxo de registro com /start
     conv_handler = ConversationHandler(
@@ -517,11 +598,23 @@ def main():
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
+    # ConversationHandler para o fluxo de depósito com /deposito
+    deposito_handler = ConversationHandler(
+        entry_points=[CommandHandler("deposito", deposito_inicio)],
+        states={
+            ESCOLHER_CATEGORIA: [
+                CallbackQueryHandler(deposito_escolher_categoria, pattern="^cat_")
+            ],
+            # ESCOLHER_INDICADO e INSERIR_VALOR serão adicionados depois
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+    )
+
     app.add_handler(conv_handler)
+    app.add_handler(deposito_handler)
     app.add_handler(CommandHandler("saldo", saldo))
 
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
