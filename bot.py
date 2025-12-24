@@ -618,7 +618,7 @@ async def saldo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --------- COMANDO /status ---------
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Mostra saldo e situação de votos por categoria."""
+    """Mostra saldo e situação de depósitos por categoria."""
     chat_id = str(update.effective_chat.id)
     usuarios = get_usuarios()
 
@@ -631,7 +631,10 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     usuario = usuarios[chat_id]
     saldo_atual = usuario.get("saldo", 0)
-    categorias_votadas = set(usuario.get("categorias_votadas", []))
+
+    # usa os depósitos reais para descobrir em quais categorias a pessoa já apostou
+    depositos = usuario.get("depositos", [])
+    categorias_votadas = {dep["categoria"] for dep in depositos}
 
     todas_categorias = set(CATEGORIAS.keys())
     categorias_faltantes = sorted(todas_categorias - categorias_votadas)
