@@ -763,7 +763,7 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     usuario = usuarios[chat_id]
     saldo_atual = usuario.get("saldo", 0)
 
-    async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
     context.user_data.pop("deposito", None)
