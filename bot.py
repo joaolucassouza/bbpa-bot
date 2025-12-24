@@ -722,12 +722,22 @@ def main():
     # ConversationHandler para o fluxo de depósito com /deposito
     deposito_handler = ConversationHandler(
         entry_points=[CommandHandler("deposito", deposito_inicio)],
+            deposito_handler = ConversationHandler(
+        entry_points=[CommandHandler("deposito", deposito_inicio)],
         states={
             ESCOLHER_CATEGORIA: [
                 CallbackQueryHandler(deposito_escolher_categoria, pattern="^cat_")
             ],
-            # ESCOLHER_INDICADO e INSERIR_VALOR serão adicionados depois
+            ESCOLHER_INDICADO: [
+                CallbackQueryHandler(deposito_escolher_indicado, pattern="^ind_")
+            ],
+            INSERIR_VALOR: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, deposito_inserir_valor)
+            ],
         },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+    )
+
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
 
