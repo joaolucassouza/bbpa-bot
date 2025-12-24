@@ -342,6 +342,20 @@ CATEGORIAS = {
 
 CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
 ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
+# IDs curtos para indicados por categoria
+IND_IDS = {}
+ID_TO_IND = {}
+
+for categoria, lista in CATEGORIAS.items():
+    inds_cat = {}
+    rev_inds_cat = {}
+    for idx, nome in enumerate(lista, start=1):
+        ind_id = f"i{idx}"
+        inds_cat[nome] = ind_id
+        rev_inds_cat[ind_id] = nome
+    IND_IDS[categoria] = inds_cat
+    ID_TO_IND[categoria] = rev_inds_cat
+
 # --------- DESCRIÇÕES DAS CATEGORIAS ---------
 DESCRICOES_CATEGORIAS = {
     "Single do Ano": (
@@ -785,7 +799,13 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     botoes = []
     linha = []
     for nome_ind in indicados:
-        linha.append(InlineKeyboardButton(nome_ind, callback_data=f"ind_{nome_ind}"))
+    ind_id = IND_IDS[categoria][nome_ind]
+    linha.append(
+        InlineKeyboardButton(
+            nome_ind,
+            callback_data=f"ind_{categoria}|{ind_id}",
+        )
+    )
         if len(linha) == 1:  # 1 por linha pra não ficar muito apertado
             botoes.append(linha)
             linha = []
@@ -820,12 +840,32 @@ async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAU
     query = update.callback_query
     await query.answer()
 
-    data = query.data  # ex.: "ind_Abracadabra"
+    data = query.data
     if not data.startswith("ind_"):
         await query.edit_message_text("Indicado inválido.")
         return ConversationHandler.END
 
-    indicado = data[4:]  # remove "ind_"
+    payload = data[4:]
+    try:
+        categoria, ind_id = payload.split("|", 1)
+    except ValueError:
+        await query.edit_message_text("Indicado inválido.")
+        return ConversationHandler.END
+
+# reconstrói o nome do indicado a partir do ID curto
+    indicado = ID_TO_IND.get(categoria, {}).get(ind_id)
+    if not indicado:
+        await query.edit_message_text("Não consegui identificar esse indicado.")
+        return ConversationHandler.END
+
+# garante que categoria bate com o que estava salvo no contexto
+    deposito = context.user_data.get("deposito", {})
+    categoria_ctx = deposito.get("categoria")
+    if categoria_ctx != categoria:
+        await query.edit_message_text(
+        "Não consegui associar esse indicado à categoria atual. Use /deposito de novo."
+    )
+        return ConversationHandler.END
 
     deposito = context.user_data.get("deposito", {})
     categoria = deposito.get("categoria")
