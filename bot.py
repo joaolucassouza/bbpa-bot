@@ -794,7 +794,7 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     # limpa contexto do depósito
     context.user_data.pop("deposito", None)
 
-    return
+    return ConversationHandler.END
 
 async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
