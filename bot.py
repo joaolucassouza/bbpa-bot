@@ -579,6 +579,127 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     )
     return ESCOLHER_INDICADO
 
+async def deposito_escolher_indicado(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Recebe o indicado escolhido e pergunta quantas moedas deseja depositar."""
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data  # ex.: 'ind_Abracadabra – Lady Gaga'
+    if not data.startswith("ind_"):
+        await query.edit_message_text("Indicado inválido. Use /deposito de novo.")
+        return ConversationHandler.END
+
+    indicado = data[4:]  # remove 'ind_'
+
+    deposito = context.user_data.get("deposito", {})
+    categoria = deposito.get("categoria")
+
+    if not categoria or categoria not in CATEGORIAS or indicado not in CATEGORIAS[categoria]:
+        await query.edit_message_text(
+            "Não consegui associar esse indicado à categoria. Use /deposito de novo."
+        )
+        return ConversationHandler.END
+
+    context.user_data["deposito"]["indicado"] = indicado
+
+    await query.edit_message_text(
+        f"Categoria: {categoria}\n"
+        f"Indicado: {indicado}\n\n"
+        "Quantas moedas você quer depositar aqui?\n"
+        "(Lembre-se: máximo 50 moedas por indicado.)"
+    )
+
+    return INSERIR_VALOR
+
+async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Recebe o valor em moedas, valida e registra o depósito."""
+    texto = update.message.text.strip()
+
+    try:
+        valor = int(texto)
+    except ValueError:
+        await update.message.reply_text(
+            "Não entendi esse número.\n"
+            "Digite apenas o valor em moedas (ex.: 20)."
+        )
+        return INSERIR_VALOR
+
+    if valor <= 0:
+        await update.message.reply_text(
+            "O valor precisa ser maior que zero. Tente de novo."
+        )
+        return INSERIR_VALOR
+
+    deposito = context.user_data.get("deposito", {})
+    categoria = deposito.get("categoria")
+    indicado = deposito.get("indicado")
+
+    if not categoria or not indicado:
+        await update.message.reply_text(
+            "Perdi o contexto do seu depósito. Use /deposito de novo."
+        )
+        return ConversationHandler.END
+
+    chat_id = str(update.effective_chat.id)
+    usuarios = get_usuarios()
+
+    if chat_id not in usuarios:
+        await update.message.reply_text(
+            "Ainda não te reconheço.\n"
+            "Use /start para se registrar com sua safeword."
+        )
+        return ConversationHandler.END
+
+    usuario = usuarios[chat_id]
+    saldo_atual = usuario.get("saldo", 0)
+
+    # ---- Regra 1: limite de 50 moedas por indicado ----
+    depositos_user = usuario.setdefault("depositos", {})
+    depositos_cat = depositos_user.setdefault(categoria, {})
+    ja_depositado = depositos_cat.get(indicado, 0)
+    total_indicado = ja_depositado + valor
+
+    if total_indicado > 50:
+        max_extra = 50 - ja_depositado
+        if max_extra < 0:
+            max_extra = 0
+        await update.message.reply_text(
+            f"Depósito recusado: você já colocou {ja_depositado} moedas em\n"
+            f"“{indicado}” ({categoria}) e o limite por indicado é 50.\n"
+            f"Você ainda pode colocar no máximo {max_extra} moedas nesse indicado."
+        )
+        return INSERIR_VALOR
+
+    # ---- Regra 2: saldo total disponível ----
+    if valor > saldo_atual:
+        await update.message.reply_text(
+            f"Depósito recusado: você só tem {saldo_atual} moedas de Payola de Ouro."
+        )
+        return INSERIR_VALOR
+
+    # Atualiza saldo e depósitos
+    usuario["saldo"] = saldo_atual - valor
+    depositos_cat[indicado] = total_indicado
+
+    categorias_votadas = usuario.setdefault("categorias_votadas", [])
+    if categoria not in categorias_votadas:
+        categorias_votadas.append(categoria)
+
+    usuarios[chat_id] = usuario
+    set_usuarios(usuarios)
+
+    await update.message.reply_text(
+        f"Depósito confirmado: {valor} moedas em\n"
+        f"“{indicado}” ({categoria}).\n\n"
+        f"Seu saldo atual é de {usuario['saldo']} moedas de Payola de Ouro.\n"
+        "Se quiser fazer outro depósito, use /deposito novamente."
+    )
+
+    # Limpa os dados temporários de depósito
+    context.user_data.pop("deposito", None)
+
+    return ConversationHandler.END
+
 # --------- FUNÇÃO PRINCIPAL ---------
 
 def main():
