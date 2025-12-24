@@ -769,11 +769,14 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
             f"Você não tem saldo suficiente. Seu saldo atual é de {saldo_atual} moedas."
         )
         return INSERIR_VALOR
+    # garante que 'depositos' é lista
+    if not isinstance(usuario.get("depositos"), list):
+        usuario["depositos"] = []
 
-    # registra depósito (ajusta conforme seu formato antigo)
-    usuario.setdefault("depositos", []).append(
+    usuario["depositos"].append(
         {"categoria": categoria, "indicado": indicado, "valor": valor}
     )
+
     usuario["saldo"] = saldo_atual - valor
     usuarios[chat_id] = usuario
     salvar_usuarios(usuarios)  # mesma função que você já usava para gravar o JSON
