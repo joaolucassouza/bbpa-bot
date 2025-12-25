@@ -833,6 +833,8 @@ async def deposito_escolher_categoria(update: Update, context: ContextTypes.DEFA
     await query.answer()
 
     data = query.data  # ex.: 'cat_c12'
+    print("DEBUG callback_data =", repr(data))
+
     if not data.startswith("cat_"):
         await query.edit_message_text("Categoria inválida. Use /deposito de novo.")
         return ConversationHandler.END
