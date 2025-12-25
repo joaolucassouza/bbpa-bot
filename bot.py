@@ -1009,7 +1009,6 @@ async def deposito_cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     await query.edit_message_text("Depósito cancelado.")
     return ConversationHandler.END
 
-
 async def deposito_voltar_categoria(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
@@ -1034,7 +1033,6 @@ async def deposito_voltar_categoria(update: Update, context: ContextTypes.DEFAUL
     )
 
     return ESCOLHER_CATEGORIA
-
 
 async def deposito_voltar_indicado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
