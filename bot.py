@@ -340,15 +340,45 @@ CATEGORIAS = {
     ],
 }
 
-CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
-ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
-# garante IDs para categorias problemáticas
-CAT_IDS["Feat do Ano"] = "feat"
-CAT_IDS["Álbum Folk/Rock"] = "album_folk_rock"
+CAT_IDS = {
+    "Artista Pop": "artista_pop",
+    "Artista R&B/Rap": "artista_rnb_rap",
+    "Artista Folk/Rock": "artista_folk_rock",
+    "Artista Global": "artista_global",
 
-ID_TO_CAT["feat"] = "Feat do Ano"
-ID_TO_CAT["album_folk_rock"] = "Álbum Folk/Rock"
-# IDs curtos para indicados por categoria
+    "Música Pop": "musica_pop",
+    "Música R&B/Rap": "musica_rnb_rap",
+    "Música Folk/Rock": "musica_folk_rock",
+    "Música Global": "musica_global",
+
+    "Álbum Pop": "album_pop",
+    "Álbum R&B/Rap": "album_rnb_rap",
+    "Álbum Folk/Rock": "album_folk_rock",
+    "Álbum Global": "album_global",
+    "Álbum do Ano": "album_ano",
+
+    "Hit do Ano": "hit_ano",
+    "Single do Ano": "single_ano",
+    "Sample do Ano": "sample_ano",
+    "Feat do Ano": "feat_ano",
+    "Track Twist": "track_twist",
+    "Smash Viral": "smash_viral",
+    "Sleeper Hit": "sleeper_hit",
+    "Dominador dos Charts": "dominador_charts",
+    "Chart Breaker": "chart_breaker",
+    "Bangermaker do Ano": "bangermaker_ano",
+    "Hitmaker do Ano": "hitmaker_ano",
+    "Revelação do Ano": "revelacao_ano",
+    "Comeback do Ano": "comeback_ano",
+    "Fan Favourite": "fan_favourite",
+    "Fandom do Ano": "fandom_ano",
+
+    "#BillboardinhesAlbumTBT": "tbt_album",
+    "#BillboardinhesMusicaTBT": "tbt_musica",
+}
+
+ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
+
 IND_IDS = {}
 ID_TO_IND = {}
 
