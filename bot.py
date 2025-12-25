@@ -392,6 +392,19 @@ for categoria, lista in CATEGORIAS.items():
     IND_IDS[categoria] = inds_cat
     ID_TO_IND[categoria] = rev_inds_cat
 
+print("=== DEBUG CATEGORIAS ===")
+print("CATEGORIAS.keys():")
+for k in CATEGORIAS.keys():
+    print(repr(k))
+print("CAT_IDS.keys():")
+for k in CAT_IDS.keys():
+    print(repr(k))
+print("========================")
+
+for nome_cat in CATEGORIAS.keys():
+    if nome_cat not in CAT_IDS:
+        print("SEM ID PRA:", repr(nome_cat))
+
 # sanity check pra achar qualquer categoria faltando ou divergente
 for nome_cat in CATEGORIAS.keys():
     assert nome_cat in CAT_IDS, f"Sem ID para categoria: {nome_cat}"
@@ -401,7 +414,7 @@ for nome_cat, cat_id in CAT_IDS.items():
     assert ID_TO_CAT[cat_id] == nome_cat, (
         f"ID {cat_id} aponta para {ID_TO_CAT[cat_id]} mas esperava {nome_cat}"
     )
-    
+
 # --------- DESCRIÇÕES DAS CATEGORIAS ---------
 DESCRICOES_CATEGORIAS = {
     "Single do Ano": (
