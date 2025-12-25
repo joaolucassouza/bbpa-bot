@@ -342,6 +342,12 @@ CATEGORIAS = {
 
 CAT_IDS = {nome: f"c{idx}" for idx, nome in enumerate(CATEGORIAS.keys(), start=1)}
 ID_TO_CAT = {v: k for k, v in CAT_IDS.items()}
+# garante IDs para categorias problemáticas
+CAT_IDS["Feat do Ano"] = "feat"
+CAT_IDS["Álbum Folk/Rock"] = "album_folk_rock"
+
+ID_TO_CAT["feat"] = "Feat do Ano"
+ID_TO_CAT["album_folk_rock"] = "Álbum Folk/Rock"
 # IDs curtos para indicados por categoria
 IND_IDS = {}
 ID_TO_IND = {}
