@@ -1182,25 +1182,25 @@ def main():
     )
 
 # ConversationHandler para o fluxo de depósito com /deposito
-deposito_handler = ConversationHandler(
-    entry_points=[CommandHandler("deposito", deposito_inicio)],
-    states={
-        ESCOLHER_CATEGORIA: [
-            CallbackQueryHandler(deposito_escolher_categoria, pattern=r"^cat_"),
-            CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
-        ],
-        ESCOLHER_INDICADO: [
-            CallbackQueryHandler(deposito_escolher_indicado, pattern=r"^ind_"),
-            CallbackQueryHandler(deposito_voltar_categoria, pattern=r"^dep_voltar_cat$"),
-            CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
-        ],
-        INSERIR_VALOR: [
-            MessageHandler(filters.TEXT & ~filters.COMMAND, deposito_inserir_valor),
-            CallbackQueryHandler(deposito_voltar_indicado, pattern=r"^dep_voltar_ind$"),
-            CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
-        ],
-    },
-    fallbacks=[CommandHandler("cancelar", deposito_cancelar)],
+    deposito_handler = ConversationHandler(
+        entry_points=[CommandHandler("deposito", deposito_inicio)],
+        states={
+            ESCOLHER_CATEGORIA: [
+                CallbackQueryHandler(deposito_escolher_categoria, pattern=r"^cat_"),
+                CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
+            ],
+            ESCOLHER_INDICADO: [
+                CallbackQueryHandler(deposito_escolher_indicado, pattern=r"^ind_"),
+                CallbackQueryHandler(deposito_voltar_categoria, pattern=r"^dep_voltar_cat$"),
+                CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
+            ],
+            INSERIR_VALOR: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, deposito_inserir_valor),
+                CallbackQueryHandler(deposito_voltar_indicado, pattern=r"^dep_voltar_ind$"),
+                CallbackQueryHandler(deposito_cancelar, pattern=r"^dep_cancelar$"),
+            ],
+        },
+        fallbacks=[CommandHandler("cancelar", deposito_cancelar)],
 )
 
     app.add_handler(conv_handler)
