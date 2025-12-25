@@ -1043,7 +1043,13 @@ async def deposito_voltar_categoria(update: Update, context: ContextTypes.DEFAUL
     botoes = []
     linha = []
     for categoria in CATEGORIAS.keys():
-        linha.append(InlineKeyboardButton(categoria, callback_data=f"cat_{categoria}"))
+        cat_id = CAT_IDS[categoria]
+        linha.append(
+            InlineKeyboardButton(
+                categoria,
+                callback_data=f"cat_{cat_id}",
+            )
+        )
         if len(linha) == 1:
             botoes.append(linha)
             linha = []
