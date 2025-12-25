@@ -364,7 +364,7 @@ CAT_IDS = {
     "Track Twist": "track_twist",
     "Smash Viral": "smash_viral",
     "Sleeper Hit": "sleeper_hit",
-    "Dominador do Charts": "dominador_charts",
+    "Dominador dos Charts": "dominador_charts",
     "Chart Breaker": "chart_breaker",
     "Bangermaker do Ano": "bangermaker_ano",
     "Hitmaker do Ano": "hitmaker_ano",
