@@ -392,6 +392,16 @@ for categoria, lista in CATEGORIAS.items():
     IND_IDS[categoria] = inds_cat
     ID_TO_IND[categoria] = rev_inds_cat
 
+# sanity check pra achar qualquer categoria faltando ou divergente
+for nome_cat in CATEGORIAS.keys():
+    assert nome_cat in CAT_IDS, f"Sem ID para categoria: {nome_cat}"
+
+for nome_cat, cat_id in CAT_IDS.items():
+    assert cat_id in ID_TO_CAT, f"ID {cat_id} não está em ID_TO_CAT"
+    assert ID_TO_CAT[cat_id] == nome_cat, (
+        f"ID {cat_id} aponta para {ID_TO_CAT[cat_id]} mas esperava {nome_cat}"
+    )
+    
 # --------- DESCRIÇÕES DAS CATEGORIAS ---------
 DESCRICOES_CATEGORIAS = {
     "Single do Ano": (
