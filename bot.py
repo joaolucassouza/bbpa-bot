@@ -965,9 +965,9 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
         )
         return INSERIR_VALOR
 
-    if valor <= 0:
+    if valor < 0:
         await update.message.reply_text(
-            "O valor precisa ser maior que zero. Tente de novo."
+            "O valor não pode ser negativo. Tente de novo."
         )
         return INSERIR_VALOR
 
