@@ -994,7 +994,28 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
     usuario = usuarios[chat_id]
     saldo_atual = usuario.get("saldo", 0)
 
-    # valida saldo
+    # ---- Regra 1: limite de 50 moedas por indicado ----
+    # soma tudo o que esse usuário já colocou nesse indicado
+    depositos_anteriores = [
+        dep["valor"]
+        for dep in usuario.get("depositos", [])
+        if dep["categoria"] == categoria and dep["indicado"] == indicado
+    ]
+    ja_depositado = sum(depositos_anteriores)
+    total_indicado = ja_depositado + valor
+
+    if total_indicado > 50:
+        max_extra = 50 - ja_depositado
+        if max_extra < 0:
+            max_extra = 0
+        await update.message.reply_text(
+            f"Depósito recusado: você já colocou {ja_depositado} moedas em\n"
+            f"“{indicado}” ({categoria}) e o limite por indicado é 50.\n"
+            f"Você ainda pode colocar no máximo {max_extra} moedas nesse indicado."
+        )
+        return INSERIR_VALOR
+
+    # ---- Regra 2: saldo total disponível ----
     if valor > saldo_atual:
         await update.message.reply_text(
             f"Você não tem saldo suficiente. Seu saldo atual é de {saldo_atual} moedas."
@@ -1011,7 +1032,6 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
 
     # atualiza saldo e salva JSON
     usuario["saldo"] = saldo_atual - valor
-    usuarios[chat_id] = usuario
     set_usuarios(usuarios)  # usa a função que já existe para salvar em usuarios.json
 
     await update.message.reply_text(
@@ -1107,53 +1127,6 @@ async def deposito_voltar_indicado(update: Update, context: ContextTypes.DEFAULT
     )
 
     return ESCOLHER_INDICADO
-
-    # ---- Regra 1: limite de 50 moedas por indicado ----
-    depositos_user = usuario.setdefault("depositos", {})
-    depositos_cat = depositos_user.setdefault(categoria, {})
-    ja_depositado = depositos_cat.get(indicado, 0)
-    total_indicado = ja_depositado + valor
-
-    if total_indicado > 50:
-        max_extra = 50 - ja_depositado
-        if max_extra < 0:
-            max_extra = 0
-        await update.message.reply_text(
-            f"Depósito recusado: você já colocou {ja_depositado} moedas em\n"
-            f"“{indicado}” ({categoria}) e o limite por indicado é 50.\n"
-            f"Você ainda pode colocar no máximo {max_extra} moedas nesse indicado."
-        )
-        return INSERIR_VALOR
-
-    # ---- Regra 2: saldo total disponível ----
-    if valor > saldo_atual:
-        await update.message.reply_text(
-            f"Depósito recusado: você só tem {saldo_atual} moedas de Payola de Ouro."
-        )
-        return INSERIR_VALOR
-
-    # Atualiza saldo e depósitos
-    usuario["saldo"] = saldo_atual - valor
-    depositos_cat[indicado] = total_indicado
-
-    categorias_votadas = usuario.setdefault("categorias_votadas", [])
-    if categoria not in categorias_votadas:
-        categorias_votadas.append(categoria)
-
-    usuarios[chat_id] = usuario
-    set_usuarios(usuarios)
-
-    await update.message.reply_text(
-        f"Depósito confirmado: {valor} moedas em\n"
-        f"“{indicado}” ({categoria}).\n\n"
-        f"Seu saldo atual é de {usuario['saldo']} moedas de Payola de Ouro.\n"
-        "Se quiser fazer outro depósito, use /deposito novamente."
-    )
-
-    # Limpa os dados temporários de depósito
-    context.user_data.pop("deposito", None)
-
-    return ConversationHandler.END
 
 # --------- FUNÇÃO PRINCIPAL ---------
 def main():
