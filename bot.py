@@ -1022,11 +1022,13 @@ async def deposito_inserir_valor(update: Update, context: ContextTypes.DEFAULT_T
         )
         return INSERIR_VALOR
 
-    # garante que 'depositos' é lista
+# garante que 'depositos' é lista
     if not isinstance(usuario.get("depositos"), list):
         usuario["depositos"] = []
 
-    usuario["depositos"].append(
+# só registra depósito se valor > 0
+    if valor > 0:
+        usuario["depositos"].append(
         {"categoria": categoria, "indicado": indicado, "valor": valor}
     )
 
