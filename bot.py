@@ -483,7 +483,6 @@ def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-
 def get_saldos_iniciais():
     return load_json("saldos_iniciais.json", {})
     
@@ -496,7 +495,6 @@ def debug_log_safewords():
 
 def get_usuarios():
     return load_json("usuarios.json", {})
-
 
 def set_usuarios(data):
     save_json("usuarios.json", data)
